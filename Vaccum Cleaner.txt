@@ -1,0 +1,62 @@
+import random
+import time
+
+class VacuumCleanerEnvironment:
+    def __init__(self):
+        self.rooms = {
+            "A": random.choice(["Clean", "Dirty"]),
+            "B": random.choice(["Clean", "Dirty"])
+        }
+        self.current_location = random.choice(["A", "B"])
+
+    def status(self):
+        return self.current_location, self.rooms[self.current_location]
+
+    def action(self, act):
+        if act == "Suck":
+            print(f"Action: SUCK dirt in Room {self.current_location}")
+            self.rooms[self.current_location] = "Clean"
+        elif act == "Left":
+            print("Action: MOVE LEFT → Room A")
+            self.current_location = "A"
+        elif act == "Right":
+            print("Action: MOVE RIGHT → Room B")
+            self.current_location = "B"
+        elif act == "NoOp":
+            print("Action: No operation (all clean)")
+
+    def is_all_clean(self):
+        return all(state == "Clean" for state in self.rooms.values())
+
+
+class VacuumAgent:
+    def __init__(self, env):
+        self.env = env
+
+    def step(self):
+        location, status = self.env.status()
+        print(f"Perception: Room {location} is {status}")
+
+        if status == "Dirty":
+            self.env.action("Suck")
+        elif location == "A":
+            self.env.action("Right")
+        elif location == "B":
+            self.env.action("Left")
+
+    def run(self, steps=10):
+        for _ in range(steps):
+            if self.env.is_all_clean():
+                self.env.action("NoOp")
+                break
+            self.step()
+            time.sleep(1)
+
+
+# --- Run the simulation ---
+env = VacuumCleanerEnvironment()
+agent = VacuumAgent(env)
+
+print("Initial Environment:", env.rooms)
+agent.run()
+print("Final Environment:", env.rooms)
